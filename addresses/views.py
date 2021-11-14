@@ -10,6 +10,9 @@ from .serializers import AddressesSerializer
 
 @csrf_exempt
 def address_list(request):
+    """
+    List all code addresses, or create a new address.
+    """
     # Read
     if request.method == 'GET':
         query_set = Addresses.objects.all()
@@ -28,20 +31,23 @@ def address_list(request):
 # 단건조회
 @csrf_exempt
 def address_detail(request, pk):
+    """
+    Retrieve, update or delete a code address.
+    """
     try:
-        obj = Addresses.objects.get(pk=pk)
+        address = Addresses.objects.get(pk=pk)
     except Addresses.DoesNotExist:
         return HttpResponse(status=404)
 
     # Read
     if request.method == 'GET':
-        serializer = AddressesSerializer(obj)
+        serializer = AddressesSerializer(address)
         return JsonResponse(serializer.data, safe=False)
 
     # Update
     elif request.method == 'PUT':
         data = JSONParser().parse(request)
-        serializer = AddressesSerializer(obj, data=data)
+        serializer = AddressesSerializer(address, data=data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=201)
@@ -49,5 +55,5 @@ def address_detail(request, pk):
 
     # Delete
     elif request.method == 'DELETE':
-        obj.delete()
-        return JsonResponse(serializer.data, status=201)
+        address.delete()
+        return HttpResponse(status=204)
